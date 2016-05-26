@@ -18,90 +18,116 @@
             }
 
             ComponentLinkField componentLinkField = (ComponentLinkField)content["blocks"];
-
-//            Logger.Debug("Aantal: " + componentLinkField.Values.Count);
+			int componentSize = componentLinkField.Values.Count;
+//            Logger.Debug("Aantal: " + componentSize);
 
             int fundCount = 0;
+			bool isOFSFund = false;
             foreach (Component comp in componentLinkField.Values)
             {
 //                Logger.Debug("Schema : " + comp.Schema.Title);
                 if (String.Compare(comp.Schema.Title, "OFS CS Fund", true) == 0)
                 {
+					isOFSFund = true;
                     package.PushItem("hasFunds", package.CreateStringItem(ContentType.Text, "true"));
                     break;
                 }
             }
 
+			/*
+				If it's an "OFS CS Fund" li's should be from top to bottom
+				in all other cases where the size is 2 or 3, li's should be 
+				from right to left
+			*/
+			if (isOFSFund)
+			{
+				ItemFields fields = new ItemFields(comp.Content, comp.Schema);
+				package.PushItem("HtmlBlockPackage", package.CreateHtmlItem(GetSingleStringValue("htmlBlock", fields)));
 
-            string ulClass = string.Empty;
+				fundList.Add(GetSingleStringValue("isin", fields));
+				Logger.Debug("Isin : " + GetSingleStringValue("isin", fields));
+				fundCount = fundCount + 1;
+				//package.PushItem("fundCount", package.CreateStringItem(ContentType.Html, fundCount.ToString()));
+				
+			} else {
+				string ulClass = string.Empty;
+				StringBuilder output = new StringBuilder();
+				
+				// makes the correct ul
+				switch (componentSize)
+				{
+					case 2:
+						Logger.Debug("Case 2");
+						ulClass = " twee" + extraClass;
+						output.AppendLine("<ul class=\"kolom" + ulClass + "\">");
+						break;
+					case 3:
+						Logger.Debug("Case 3");
+						ulClass = " drie" + extraClass; ;
+						output.AppendLine("<ul class=\"kolom" + ulClass + "\">");
+						break;
+					default:
+						Logger.Debug("Default case");
+						break;
+				}
 
-            StringBuilder output = new StringBuilder();
+				// makes corresponding li's
+				int i = 1;
+				string liClass = string.Empty;
+				foreach (Component comp in componentLinkField.Values)
+				{
+					Logger.Debug("i = " + i);
+					if (i == componentSize)
+					{
+						liClass = " class=\"last\"";
+					}
+					Logger.Debug("Comp: " + comp.Id);
+					if (componentSize == 2 || componentSize == 3 )
+					{
+						output.AppendLine("<li" + liClass + ">");
+					}
 
-            switch (componentLinkField.Values.Count)
-            {
-                case 2:
-                    Logger.Debug("Case 2");
-                    ulClass = " twee" + extraClass;
-                    output.AppendLine("<ul class=\"kolom" + ulClass + "\">");
-                    break;
-                case 3:
-                    Logger.Debug("Case 3");
-                    ulClass = " drie" + extraClass; ;
-                    output.AppendLine("<ul class=\"kolom" + ulClass + "\">");
-                    break;
-                default:
-                    Logger.Debug("Default case");
-                    break;
-            }
+					Logger.Debug("Context: " + engine.PublishingContext.RenderContext.ContextItem);
+				   
+					// what does this do??????  
+					string mappingComponentWebDAVURL = "/webdav/CS%20Netherlands/Building%20Blocks%20Management/System%20OFS/system/Schema-CT%20mapping/Schema-CT%20mapping%20homepage.xml";
+					if (" klant".Equals(extraClass))
+					{ 
+						output.Append(RenderComponentPresentation(comp, mappingComponentWebDAVURL, extraClass));
+					} else {
+						output.Append(RenderComponentPresentation(comp, mappingComponentWebDAVURL));
+					}
+					
+					if (componentSize == 2 || componentSize == 3)
+					{
+						output.AppendLine("</li>");
+					}
+					i = i + 1;
 
-            int i = 1;
-            string liClass = string.Empty;
-            foreach (Component comp in componentLinkField.Values)
-            {
-                Logger.Debug("i = " + i);
-                if (i == componentLinkField.Values.Count)
-                {
-                    liClass = " class=\"last\"";
-                }
-                Logger.Debug("Comp: " + comp.Id);
-                if (componentLinkField.Values.Count == 2 || componentLinkField.Values.Count == 3 )
-                {
-                    output.AppendLine("<li" + liClass + ">");
-                }
+				}
+				
+				// closes the ul
+				if (componentSize == 2 || componentSize == 3)
+				{
+					output.AppendLine("</ul>");
+				}
+			}
+            
 
-                if (comp.Schema.Title.Equals( "OFS CS Fund" ))
-                {
-                    ItemFields fields = new ItemFields(comp.Content, comp.Schema);
-                    package.PushItem("HtmlBlockPackage", package.CreateHtmlItem(GetSingleStringValue("htmlBlock", fields)));
-
-                    fundList.Add(GetSingleStringValue("isin", fields));
-                    Logger.Debug("Isin : " + GetSingleStringValue("isin", fields));
-                    fundCount = fundCount + 1;
-                    //package.PushItem("fundCount", package.CreateStringItem(ContentType.Html, fundCount.ToString()));
-                }
-
-                Logger.Debug("Context: " + engine.PublishingContext.RenderContext.ContextItem);
-               
-                    
-                string mappingComponentWebDAVURL = "/webdav/CS%20Netherlands/Building%20Blocks%20Management/System%20OFS/system/Schema-CT%20mapping/Schema-CT%20mapping%20homepage.xml";
-                if (" klant".Equals(extraClass))
-                { 
-                    output.Append(RenderComponentPresentation(comp, mappingComponentWebDAVURL, extraClass));
-                } else {
-                    output.Append(RenderComponentPresentation(comp, mappingComponentWebDAVURL));
-                }
-                if (componentLinkField.Values.Count == 2 || componentLinkField.Values.Count == 3)
-                {
-                    output.AppendLine("</li>");
-                }
-                i = i + 1;
-
-            }
-            if (componentLinkField.Values.Count == 2 || componentLinkField.Values.Count == 3)
-            {
-                output.AppendLine("</ul>");
-            }
-
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
             // make the javascript block for the fundSelection
             Logger.Debug("FundCount : " + fundList.Count);
 
