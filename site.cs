@@ -2,7 +2,7 @@
 	public class HomePageUtilities : TemplateBase
 	{		
 		// makes the ul
-		public String makeUnorderedList(ComponentLinkField componentLinkField, String ulClass)
+		public String makeUnorderedList(ComponentLinkField componentLinkField, string ulClass, string extraClass)
 		{
 			int i = 1;
 			StringBuilder output = new StringBuilder();
@@ -20,6 +20,8 @@
 				output.AppendLine("<li" + liClass + ">");
 
 				// what does this do??????  
+				// This is weird, We only open and close <li> when componentSize is 2 or 3
+				// Yet we append something EVERYTIME in the old code???  
 				string mappingComponentWebDAVURL = "/webdav/CS%20Netherlands/Building%20Blocks%20Management/System%20OFS/system/Schema-CT%20mapping/Schema-CT%20mapping%20homepage.xml";
 				if (" klant".Equals(extraClass))
 				{ 
@@ -33,7 +35,7 @@
 			}
 			output.AppendLine("</ul>");
 			
-			return output;
+			return output.ToString();
 		}
 		
 		public override void Transform(Tridion.ContentManager.Templating.Engine engine, Tridion.ContentManager.Templating.Package package)
@@ -42,7 +44,7 @@
 			this.Initialize(engine, package);
 			Component component = this.GetComponent();
 			ItemFields content = new ItemFields(component.Content, component.Schema);
-			StringBuilder output = new StringBuilder();
+			String output = string.Empty;
 			
 			string extraClass = GetSingleStringValue("extraClass", content);
 			List<string> fundList = new List<string>();
@@ -93,79 +95,18 @@
 					case 2:
 						Logger.Debug("Case 2");
 						ulClass = " twee" + extraClass;
-						output = makeUnorderedList(componentLinkField, ulClass);
+						output = makeUnorderedList(componentLinkField, ulClass, extraClass);
 						break;
 					case 3:
 						Logger.Debug("Case 3");
 						ulClass = " drie" + extraClass; ;
-						output = makeUnorderedList(componentLinkField, ulClass);
+						output = makeUnorderedList(componentLinkField, ulClass, extraClass);
 						break;
 					default:
 						Logger.Debug("Default case");
 						break;
 				}
 			}
-			
-			/*
-				// makes corresponding li's
-				int i = 1;
-				string liClass = string.Empty;
-				foreach (Component comp in componentLinkField.Values)
-				{
-					Logger.Debug("i = " + i);
-					
-					// marks the last li as the last one 
-					if (i == componentSize)
-					{
-						liClass = " class=\"last\"";
-					}
-					Logger.Debug("Comp: " + comp.Id);
-					if (componentSize == 2 || componentSize == 3 )
-					{
-						output.AppendLine("<li" + liClass + ">");
-					}
-
-					Logger.Debug("Context: " + engine.PublishingContext.RenderContext.ContextItem);
-				   
-					// what does this do??????  
-					// This is weird, We only open and close <li> when componentSize is 2 or 3
-					// Yet we append something EVERYTIME???
-					string mappingComponentWebDAVURL = "/webdav/CS%20Netherlands/Building%20Blocks%20Management/System%20OFS/system/Schema-CT%20mapping/Schema-CT%20mapping%20homepage.xml";
-					if (" klant".Equals(extraClass))
-					{ 
-						output.Append(RenderComponentPresentation(comp, mappingComponentWebDAVURL, extraClass));
-					} else {
-						output.Append(RenderComponentPresentation(comp, mappingComponentWebDAVURL));
-					}
-					
-					if (componentSize == 2 || componentSize == 3)
-					{
-						output.AppendLine("</li>");
-					}
-					i = i + 1;
-
-				}
-				
-				// closes the ul
-				if (componentSize != 1)
-				{
-					output.AppendLine("</ul>");
-				}
-				*/
-            
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
 			
             // make the javascript block for the fundSelection
             Logger.Debug("FundCount : " + fundList.Count);
@@ -222,7 +163,7 @@
 
             }
 
-            package.PushItem("homeBlocks", package.CreateStringItem(ContentType.Html, output.ToString()));
+            package.PushItem("homeBlocks", package.CreateStringItem(ContentType.Html, output));
 
             //Determine if this component is the last on the Page
             if (isLastComponentOnPage(component))
