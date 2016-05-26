@@ -22,13 +22,13 @@
 //            Logger.Debug("Aantal: " + componentSize);
 
             int fundCount = 0;
-			bool isOFSFund = false;
+            bool isOFSFund = false;
             foreach (Component comp in componentLinkField.Values)
             {
 //                Logger.Debug("Schema : " + comp.Schema.Title);
                 if (String.Compare(comp.Schema.Title, "OFS CS Fund", true) == 0)
                 {
-					isOFSFund = true;
+                    isOFSFund = true;
                     package.PushItem("hasFunds", package.CreateStringItem(ContentType.Text, "true"));
                     break;
                 }
@@ -39,7 +39,7 @@
 				in all other cases where the size is 2 or 3, li's should be 
 				from right to left
 			*/
-			if (isOFSFund)
+            if (isOFSFund)
 			{
 				ItemFields fields = new ItemFields(comp.Content, comp.Schema);
 				package.PushItem("HtmlBlockPackage", package.CreateHtmlItem(GetSingleStringValue("htmlBlock", fields)));
