@@ -21,7 +21,7 @@
 
 				// what does this do??????  
 				// This is weird, We only open and close <li> when componentSize is 2 or 3
-				// Yet we append something EVERYTIME in the old code???  
+				// Yet we append something EVERYTIME in the old code (and this code)???  
 				string mappingComponentWebDAVURL = "/webdav/CS%20Netherlands/Building%20Blocks%20Management/System%20OFS/system/Schema-CT%20mapping/Schema-CT%20mapping%20homepage.xml";
 				if (" klant".Equals(extraClass))
 				{ 
@@ -52,6 +52,7 @@
 			ComponentLinkField componentLinkField = (ComponentLinkField)content["blocks"];
 			
 			// a hack, but i dont know for what...
+			// probably because you do + extraclass in the switch statement 
 			if (extraClass.Length > 0)
 			{
 				extraClass = " " + extraClass;
@@ -159,8 +160,6 @@
                 outputJS.AppendLine("\t\twa.fSetEvent('Top5BuyFunds', [{ selectedFunds: dict }] );");
                 outputJS.AppendLine("</script>");
                 package.PushItem("homeJS", package.CreateStringItem(ContentType.Html, outputJS.ToString()));
-
-
             }
 
             package.PushItem("homeBlocks", package.CreateStringItem(ContentType.Html, output));
